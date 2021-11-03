@@ -1,6 +1,7 @@
-__version__ = '0.1.3'
+__version__ = '1.0.2'
 
 from datetime import datetime
+from functools import cached_property
 
 import pandas as pd
 import numpy as np
@@ -158,11 +159,11 @@ def calc_monthly_returns(returns: pd.Series):
     monthly_returns = eom_returns.pivot('year', 'month', 'returns').fillna(0)
 
     month_columns = [f'{m:02d}' for m in range(1, 13)]
-    # handle missing months
+    # fulfill missing months
     for month in month_columns:
         if month not in monthly_returns.columns:
             monthly_returns.loc[:, month] = 0.0
-    # order columns by month
+    # order
     monthly_returns = monthly_returns[month_columns]
 
     return monthly_returns
@@ -218,284 +219,157 @@ def calc_drawdown_stats(drawdown_details: pd.DataFrame):
 
 
 class Metrics:
-    def __init__(self, prices: pd.Series, benchmark: pd.Series = None, rf=None):
+    def __init__(self, prices: pd.Series, rf=None):
 
-        self._prices = prices
-        self._benchmark = benchmark
-        self._rf = rf
-        self._start_time = self._prices.index[0]
-        self._end_time = self._prices.index[-1]
+        self.prices = prices
+        self.rf = rf
+        self.start_time = self.prices.index[0]
+        self.end_time = self.prices.index[-1]
 
-        # series
-        self._returns = None
-        self._drawdowns = None
-        self._eow_returns = None
-        self._eom_returns = None
-        self._eoy_returns = None
-
-        # details, pd.DataFrame
-        self._drawdown_details = None
-        self._monthly_returns = None
-
-        # metrics
-        self._total_return = None
-        self._cagr = None
-        self._sharpe = None
-        self._sortino = None
-        self._max_drawdown = None
-        self._longest_drawdown_days = None
-        self._avg_drawdown = None
-        self._avg_drawdown_days = None
-        self._volatility = None
-        self._calmar = None
-        self._skew = None
-        self._kurt = None
-
-        self._mtd_return = None
-        self._one_month_return = None
-        self._three_month_return = None
-        self._six_month_return = None
-        self._ytd_return = None
-        self._one_year_return = None
-        self._three_year_return = None
-
-        self._best_day = None
-        self._worst_day = None
-        self._best_week = None
-        self._worst_week = None
-        self._best_month = None
-        self._worst_month = None
-
-        self._win_rate_day = None
-        self._win_rate_week = None
-        self._win_rate_month = None
-
-    @property
-    def rf(self):
-        return self._rf
-
-    @property
-    def start_time(self):
-        return self._start_time
-
-    @property
-    def end_time(self):
-        return self._end_time
-
-    @property
+    @cached_property
     def returns(self):
-        if self._returns is None:
-            self._returns = calc_returns(self._prices)
-        return self._returns
+        return calc_returns(self.prices)
 
-    @property
+    @cached_property
     def drawdowns(self):
-        if self._drawdowns is None:
-            self._drawdowns = calc_drawdowns(self._prices)
-        return self._drawdowns
+        return calc_drawdowns(self.prices)
 
-    @property
+    @cached_property
     def drawdown_details(self):
-        if self._drawdown_details is None:
-            self._drawdown_details = calc_drawdown_details(self.drawdowns)
-        return self._drawdown_details
+        return calc_drawdown_details(self.drawdowns)
 
-    @property
+    @cached_property
     def eow_returns(self):
-        if self._eow_returns is None:
-            self._eow_returns = calc_eow_returns(self.returns)
-        return self._eow_returns
+        return calc_eow_returns(self.returns)
 
-    @property
+    @cached_property
     def eom_returns(self):
-        if self._eom_returns is None:
-            self._eom_returns = calc_eom_returns(self.returns)
-        return self._eom_returns
+        return calc_eom_returns(self.returns)
 
-    @property
+    @cached_property
     def eoy_returns(self):
-        if self._eoy_returns is None:
-            self._eoy_returns = calc_eoy_returns(self.returns)
-        return self._eoy_returns
+        return calc_eoy_returns(self.returns)
 
-    @property
+    @cached_property
     def monthly_returns(self):
-        if self._monthly_returns is None:
-            self._monthly_returns = calc_monthly_returns(self.returns)
-        return self._monthly_returns
+        return calc_monthly_returns(self.returns)
 
-    @property
+    @cached_property
     def total_return(self):
-        if self._total_return is None:
-            self._total_return = calc_total_return(self._prices)
-        return self._total_return
+        return calc_total_return(self.prices)
 
-    @property
+    @cached_property
     def cagr(self):
-        if self._cagr is None:
-            self._cagr = calc_cagr(self._prices)
-        return self._cagr
+        return calc_cagr(self.prices)
 
-    @property
+    @cached_property
     def sharpe(self):
-        if self._sharpe is None:
-            self._sharpe = calc_sharpe(self.returns, self.rf)
-        return self._sharpe
+        return calc_sharpe(self.returns, self.rf)
 
-    @property
+    @cached_property
     def sortino(self):
-        if self._sortino is None:
-            self._sortino = calc_sortino(self.returns, self.rf)
-        return self._sortino
+        return calc_sortino(self.returns, self.rf)
 
-    @property
+    @cached_property
     def max_drawdown(self):
-        if self._max_drawdown is None:
-            self._max_drawdown = calc_max_drawdown(self._prices)
-        return self._max_drawdown
+        return calc_max_drawdown(self.prices)
 
-    @property
+    @cached_property
     def longest_drawdown_days(self):
-        if self._longest_drawdown_days is None:
-            self._longest_drawdown_days = self.drawdown_details['days'].max()
-        return self._longest_drawdown_days
+        return self.drawdown_details['days'].max()
 
-    @property
+    @cached_property
     def avg_drawdown(self):
-        if self._avg_drawdown is None:
-            self._avg_drawdown = self.drawdown_details['drawdown'].mean()
-        return self._avg_drawdown
+        return self.drawdown_details['drawdown'].mean()
 
-    @property
+    @cached_property
     def avg_drawdown_days(self):
-        if self._avg_drawdown_days is None:
-            self._avg_drawdown_days = self.drawdown_details['days'].mean()
-        return self._avg_drawdown_days
+        return self.drawdown_details['days'].mean()
 
-    @property
+    @cached_property
     def volatility(self):
-        if self._volatility is None:
-            self._volatility = calc_volatility(self.returns)
-        return self._volatility
+        return calc_volatility(self.returns)
 
-    @property
+    @cached_property
     def calmar(self):
-        if self._calmar is None:
-            self._calmar = self.cagr / abs(self.max_drawdown)
-        return self._calmar
+        return self.cagr / abs(self.max_drawdown)
 
-    @property
+    @cached_property
     def skew(self):
-        if self._skew is None:
-            self._skew = self.returns.skew()
-        return self._skew
+        return self.returns.skew()
 
-    @property
+    @cached_property
     def kurt(self):
-        if self._kurt is None:
-            self._kurt = self.returns.kurt()
-        return self._kurt
+        return self.returns.kurt()
 
-    @property
+    @cached_property
     def mtd_return(self):
-        if self._mtd_return is None:
-            self._mtd_return = calc_mtd_return(self.returns)
-        return self._mtd_return
+        return calc_mtd_return(self.returns)
 
-    @property
+    @cached_property
     def one_month_return(self):
-        if self._one_month_return is None:
-            self._one_month_return = calc_1m_return(self.returns)
-        return self._one_month_return
+        return calc_1m_return(self.returns)
 
-    @property
+    @cached_property
     def three_month_return(self):
-        if self._three_month_return is None:
-            self._three_month_return = calc_3m_return(self.returns)
-        return self._three_month_return
+        return calc_3m_return(self.returns)
 
-    @property
+    @cached_property
     def six_month_return(self):
-        if self._six_month_return is None:
-            self._six_month_return = calc_6m_return(self.returns)
-        return self._six_month_return
+        return calc_6m_return(self.returns)
 
-    @property
+    @cached_property
     def ytd_return(self):
-        if self._ytd_return is None:
-            self._ytd_return = calc_ytd_return(self.returns)
-        return self._ytd_return
+        return calc_ytd_return(self.returns)
 
-    @property
+    @cached_property
     def one_year_return(self):
-        if self._one_year_return is None:
-            self._one_year_return = calc_1y_return(self.returns)
-        return self._one_year_return
+        return calc_1y_return(self.returns)
 
-    @property
+    @cached_property
     def three_year_return(self):
-        if self._three_year_return is None:
-            self._three_year_return = calc_3y_return(self.returns)
-        return self._three_year_return
+        return calc_3y_return(self.returns)
 
-    @property
+    @cached_property
     def best_day(self):
-        if self._best_day is None:
-            self._best_day = self.returns.max()
-        return self._best_day
+        return self.returns.max()
 
-    @property
+    @cached_property
     def worst_day(self):
-        if self._worst_day is None:
-            self._worst_day = self.returns.min()
-        return self._worst_day
+        return self.returns.min()
 
-    @property
+    @cached_property
     def best_week(self):
-        if self._best_week is None:
-            self._best_week = self.eow_returns.max()
-        return self._best_week
+        return self.eow_returns.max()
 
-    @property
+    @cached_property
     def worst_week(self):
-        if self._worst_week is None:
-            self._worst_week = self.eow_returns.min()
-        return self._worst_week
+        return self.eow_returns.min()
 
-    @property
+    @cached_property
     def best_month(self):
-        if self._best_month is None:
-            self._best_month = self.eom_returns.max()
-        return self._best_month
+        return self.eom_returns.max()
 
-    @property
+    @cached_property
     def worst_month(self):
-        if self._worst_month is None:
-            self._worst_month = self.eom_returns.min()
-        return self._worst_month
+        return self.eom_returns.min()
 
-    @property
+    @cached_property
     def win_rate_day(self):
-        if self._win_rate_day is None:
-            win_count = self.returns[self.returns > 0].count()
-            self._win_rate_day = win_count/self.returns.count()
-        return self._win_rate_day
+        win_count = self.returns[self.returns > 0].count()
+        return win_count / self.returns.count()
 
-    @property
+    @cached_property
     def win_rate_week(self):
-        if self._win_rate_week is None:
-            win_count = self.eow_returns[self.eow_returns > 0].count()
-            self._win_rate_week = win_count/self.eow_returns.count()
-        return self._win_rate_week
+        win_count = self.eow_returns[self.eow_returns > 0].count()
+        return win_count/self.eow_returns.count()
 
-    @property
+    @cached_property
     def win_rate_month(self):
-        if self._win_rate_month is None:
-            win_count = self.eom_returns[self.eom_returns > 0].count()
-            self._win_rate_month = win_count/self.eom_returns.count()
-        return self._win_rate_month
+        win_count = self.eom_returns[self.eom_returns > 0].count()
+        return win_count / self.eom_returns.count()
 
-    @property
+    @cached_property
     def stats(self):
         _r = [
             ('Start Time', self.start_time.strftime('%Y-%m-%d')),
@@ -529,6 +403,6 @@ class Metrics:
             ('Win% Week', f'{self.win_rate_week:.2%}'),
             ('Win% Month', f'{self.win_rate_month:.2%}'),
         ]
-        s = pd.Series(dict(_r), name=self._prices.name)
+        s = pd.Series(dict(_r), name=self.prices.name)
         s.index.name = ''
         return s
