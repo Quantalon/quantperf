@@ -220,7 +220,6 @@ def calc_drawdown_stats(drawdown_details: pd.DataFrame):
 
 class Metrics:
     def __init__(self, prices: pd.Series, rf=None):
-
         self.prices = prices
         self.rf = rf
         self.start_time = self.prices.index[0]
