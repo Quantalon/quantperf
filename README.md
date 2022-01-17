@@ -2,7 +2,11 @@
 
 ## QuickStart
 
+```bash
+# pip install quantperf
 ```
+
+```python
 import yfinance as yf
 from quantperf import Metrics
 
