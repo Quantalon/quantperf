@@ -1,4 +1,4 @@
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 from datetime import datetime
 from functools import cached_property
@@ -53,8 +53,8 @@ def calc_total_return(prices: pd.Series):
 
 def calc_drawdowns(prices: pd.Series):
     roll_max = prices.cummax()
-    drawdown = prices / roll_max - 1.0
-    return drawdown
+    drawdowns = prices / roll_max - 1.0
+    return drawdowns
 
 
 def calc_returns_mean(returns: pd.Series):
@@ -181,6 +181,8 @@ def calc_drawdown_details(drawdowns: pd.Series):
     starts = starts[starts].index.to_list()
 
     ends = ~is_dd & is_dd.shift(1)
+    if ends.sum() == 0:
+        ends.iloc[-1] = True
     ends = ends[ends].index.to_list()
 
     if len(starts) == 0:
