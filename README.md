@@ -10,10 +10,10 @@
 import yfinance as yf
 from quantperf import Metrics
 
-aapl = yf.Ticker("AAPL")
-data = aapl.history()
-prices = data['Close']
-metrics = Metrics(prices)
+daily_prices = yf.Ticker("AAPL").history()['Close']
+
+# The input must be **daily** prices
+metrics = Metrics(daily_prices)
 
 print(metrics.stats)
 ```

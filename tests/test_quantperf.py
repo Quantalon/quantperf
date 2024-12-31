@@ -7,7 +7,7 @@ from quantperf import Metrics
 
 
 def test_version():
-    assert __version__ == '1.0.3'
+    assert __version__ == '1.0.5'
 
 
 def test_metrics():
@@ -17,3 +17,8 @@ def test_metrics():
     metrics = Metrics(prices)
     stats = metrics.stats
     print(stats)
+
+
+if __name__ == '__main__':
+    test_version()
+    test_metrics()

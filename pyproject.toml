@@ -1,0 +1,8 @@
+[project]
+name = "quantperf"
+version = "1.0.5"
+description = "QuantPerf"
+readme = "README.md"
+dependencies = [
+  "pandas"
+]

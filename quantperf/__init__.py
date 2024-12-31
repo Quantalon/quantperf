@@ -1,4 +1,4 @@
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 
 from datetime import datetime
 from functools import cached_property
@@ -8,7 +8,7 @@ import numpy as np
 
 
 def rebase(prices: pd.Series):
-    return prices / prices.iloc[0]
+    return prices / prices.iat[0]
 
 
 def calc_returns(prices: pd.Series):
@@ -25,7 +25,7 @@ def calc_eow_returns(returns: pd.Series):
 
 def calc_eom_returns(returns: pd.Series):
     eom_returns = returns.groupby(
-        pd.Grouper(freq='M')
+        pd.Grouper(freq='ME')
     ).apply(lambda r: r.add(1).prod() - 1)
     return eom_returns
 
